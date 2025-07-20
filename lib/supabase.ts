@@ -1,31 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 
-// --- ADICIONE ESTES LOGS PARA DEBUGAR O BUILD ---
-console.log(
-  "DEBUG_BUILD: NEXT_PUBLIC_SUPABASE_URL =",
-  process.env.NEXT_PUBLIC_SUPABASE_URL
-)
-console.log(
-  "DEBUG_BUILD: NEXT_PUBLIC_SUPABASE_ANON_KEY =",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
-// -------------------------------------------------
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl) {
-  // Mensagem de erro mais clara para o build
-  throw new Error(
-    "Erro de Build: NEXT_PUBLIC_SUPABASE_URL não definida. Verifique as Variáveis de Ambiente no Vercel."
-  )
-}
-if (!supabaseAnonKey) {
-  // Mensagem de erro mais clara para o build
-  throw new Error(
-    "Erro de Build: NEXT_PUBLIC_SUPABASE_ANON_KEY não definida. Verifique as Variáveis de Ambiente no Vercel."
-  )
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -47,6 +23,8 @@ export interface Product {
   categories?: {
     name: string
   }
+  location?: string // Campo para localização/endereço
+  observation?: string // Adicionado: Campo para observações
 }
 
 export interface Category {

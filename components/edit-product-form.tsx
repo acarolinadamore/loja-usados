@@ -25,7 +25,13 @@ import {
 import { MultiImageUpload } from "./multi-image-upload"
 import Link from "next/link"
 
-const conditions = ["Novo", "Muito Bom", "Bom", "Regular"]
+const conditions = [
+  "Novo",
+  "Em estado de novo",
+  "Em ótimo estado",
+  "Em bom estado",
+  "Usado",
+]
 
 interface EditProductFormProps {
   product: Product
@@ -42,6 +48,8 @@ export function EditProductForm({ product }: EditProductFormProps) {
     category_id: product.category_id.toString(),
     whatsapp: product.whatsapp || "",
     status: product.status,
+    location: product.location || "", // Campo para localização
+    observation: product.observation || "", // Adicionado: Campo para observações
   })
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const [coverIndex, setCoverIndex] = useState(product.cover_image_index || 0)
@@ -105,6 +113,8 @@ export function EditProductForm({ product }: EditProductFormProps) {
           category_id: Number.parseInt(formData.category_id),
           whatsapp: formData.whatsapp,
           status: formData.status,
+          location: formData.location, // Salvar localização
+          observation: formData.observation, // Salvar observação
           images: finalImages,
           image_url: finalImages[finalCoverIndex] || finalImages[0], // Imagem de capa
           cover_image_index: finalCoverIndex,
@@ -247,6 +257,19 @@ export function EditProductForm({ product }: EditProductFormProps) {
                     placeholder="11999999999"
                   />
                 </div>
+
+                {/* Campo de Localização renomeado */}
+                <div>
+                  <Label htmlFor="location">Buscar no Local</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    placeholder="Ex: Condomínio Bahamas, Bloco G 302"
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -261,6 +284,20 @@ export function EditProductForm({ product }: EditProductFormProps) {
                     placeholder="Descreva o produto, estado de conservação, detalhes importantes..."
                     rows={4}
                     required
+                  />
+                </div>
+
+                {/* Adicionado: Campo de Observação */}
+                <div>
+                  <Label htmlFor="observation">Observação</Label>
+                  <Textarea
+                    id="observation"
+                    value={formData.observation}
+                    onChange={(e) =>
+                      setFormData({ ...formData, observation: e.target.value })
+                    }
+                    placeholder="Informações adicionais sobre o produto ou venda..."
+                    rows={3}
                   />
                 </div>
 

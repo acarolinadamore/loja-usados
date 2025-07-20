@@ -13,7 +13,9 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-} from "lucide-react"
+  MapPin,
+  Info,
+} from "lucide-react" // Adicionado MapPin e Info
 import type { Product } from "@/lib/supabase"
 
 interface ProductDetailsProps {
@@ -73,6 +75,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const prevImageInModal = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
+
+  // Gerar URL do Google Maps Embed
+  const googleMapsEmbedUrl = product.location
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(
+        product.location
+      )}&output=embed`
+    : null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -152,7 +161,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 </DialogTrigger>
 
                 {/* Modal de imagem ampliada */}
-                <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-black">
+                <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-black border-none">
                   <div className="relative w-full h-full flex items-center justify-center">
                     <Button
                       variant="ghost"
@@ -286,12 +295,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     <span className="font-medium">{product.status}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Fotos:</span>
-                    <span className="font-medium">
-                      {images.length} imagem{images.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-gray-600">Publicado em:</span>
                     <span className="font-medium">
                       {new Date(product.created_at).toLocaleDateString("pt-BR")}
@@ -301,7 +304,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </CardContent>
             </Card>
 
-            {/* Botão de Contato */}
+            {/* Botão de Contato - MOVIDO PARA CIMA DA LOCALIZAÇÃO */}
             {product.status === "Disponível" && (
               <Button
                 onClick={handleWhatsApp}
@@ -313,6 +316,48 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
         </div>
+
+        {/* Seção de Localização com Mapa - AGORA EM LARGURA TOTAL ABAIXO DO GRID */}
+        {product.location && (
+          <Card className="mt-8">
+            {" "}
+            {/* Adicionado mt-8 para espaçamento */}
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-gray-600" />
+                Buscar no Local
+              </h3>
+              <p className="text-gray-700 mb-4">{product.location}</p>
+              <div className="w-full h-64 rounded-lg overflow-hidden">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={googleMapsEmbedUrl || ""}
+                ></iframe>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Adicionado: Seção de Observação */}
+        {product.observation && (
+          <Card className="mt-4">
+            {" "}
+            {/* Adicionado mt-4 para espaçamento */}
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <Info className="h-5 w-5 text-gray-600" />
+                Observação
+              </h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {product.observation}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

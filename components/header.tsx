@@ -22,7 +22,9 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-8 w-8 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-900">Loja de Usados</h1>
+            <h1 className="text-xl font-bold text-gray-900">
+              Loja de Usados da Carol
+            </h1>
           </div>
           {showLogoutButton && ( // Conditionally render the button
             <Button variant="outline" size="sm" onClick={handleLogout}>

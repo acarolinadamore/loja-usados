@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabase/client"
+import { useRouter, useSearchParams } from "next/navigation"
 
 interface CategoryWithCount {
   id: number
@@ -13,16 +14,34 @@ interface CategoryWithCount {
 }
 
 export function CategoryFilter() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialSelectedCategories = searchParams.get("categories")
+    ? searchParams.get("categories")!.split(",").map(Number)
+    : []
   const [categories, setCategories] = useState<CategoryWithCount[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(
+    initialSelectedCategories
+  )
 
   useEffect(() => {
     fetchCategoriesWithCount()
   }, [])
 
+  // Effect to update URL when selectedCategories change
+  useEffect(() => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    if (selectedCategories.length > 0) {
+      current.set("categories", selectedCategories.join(","))
+    } else {
+      current.delete("categories")
+    }
+    const query = current.toString()
+    router.replace(`/?${query}`) // Changed from router.push to router.replace
+  }, [selectedCategories, router, searchParams])
+
   const fetchCategoriesWithCount = async () => {
     try {
-      // Buscar categorias com contagem real de produtos
       const { data: categoriesData } = await supabase
         .from("categories")
         .select("id, name")
@@ -30,7 +49,6 @@ export function CategoryFilter() {
 
       if (!categoriesData) return
 
-      // Para cada categoria, contar produtos disponíveis
       const categoriesWithCount = await Promise.all(
         categoriesData.map(async (category) => {
           const { count } = await supabase
@@ -46,7 +64,6 @@ export function CategoryFilter() {
         })
       )
 
-      // Filter out categories with 0 products
       const filteredCategories = categoriesWithCount.filter(
         (category) => category.count > 0
       )
@@ -58,13 +75,13 @@ export function CategoryFilter() {
   }
 
   const handleCategoryChange = (categoryId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedCategories([...selectedCategories, categoryId])
-    } else {
-      setSelectedCategories(
-        selectedCategories.filter((id) => id !== categoryId)
-      )
-    }
+    setSelectedCategories((prev) => {
+      if (checked) {
+        return [...prev, categoryId]
+      } else {
+        return prev.filter((id) => id !== categoryId)
+      }
+    })
   }
 
   return (

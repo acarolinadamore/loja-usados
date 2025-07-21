@@ -2,10 +2,32 @@
 
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function SearchBar() {
-  const [search, setSearch] = useState("")
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get("search") || ""
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
+
+  // Debounce the search term update to avoid too many re-renders/API calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const current = new URLSearchParams(Array.from(searchParams.entries())) // Get a new set of params
+      if (searchTerm) {
+        current.set("search", searchTerm)
+      } else {
+        current.delete("search")
+      }
+      const query = current.toString()
+      router.replace(`/?${query}`) // Changed from router.push to router.replace
+    }, 500) // 500ms debounce
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchTerm, router, searchParams])
 
   return (
     <div className="relative">
@@ -13,8 +35,8 @@ export function SearchBar() {
       <Input
         type="text"
         placeholder="Buscar produtos..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         className="pl-10"
       />
     </div>

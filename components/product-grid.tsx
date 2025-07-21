@@ -2,44 +2,65 @@
 
 import { useEffect, useState } from "react"
 import { ProductCard } from "./product-card"
-import { supabase } from "@/lib/supabase/client" // Importa do cliente
-import type { Product } from "@/lib/supabase/types" // Importa o tipo
+import { supabase } from "@/lib/supabase/client"
+import type { Product } from "@/lib/supabase/types"
+import { useSearchParams } from "next/navigation"
 
 export function ProductGrid() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
 
+  // Use searchParams.toString() as a stable dependency
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    const searchTerm = searchParams.get("search")
+    const categoryIds =
+      searchParams.get("categories")?.split(",").map(Number) || []
 
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select(
+    const fetchProducts = async () => {
+      setLoading(true)
+      try {
+        let query = supabase
+          .from("products")
+          .select(
+            `
+            *,
+            categories (
+              name
+            )
           `
-          *,
-          categories (
-            name
           )
-        `
-        )
-        .eq("status", "Disponível")
-        .order("created_at", { ascending: false })
+          .eq("status", "Disponível")
 
-      if (error) {
-        console.error("Erro ao buscar produtos:", error)
-        return
+        if (searchTerm) {
+          query = query.or(
+            `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
+          )
+        }
+
+        if (categoryIds.length > 0) {
+          query = query.in("category_id", categoryIds)
+        }
+
+        query = query.order("created_at", { ascending: false })
+
+        const { data, error } = await query
+
+        if (error) {
+          console.error("Erro ao buscar produtos:", error)
+          return
+        }
+
+        setProducts(data || [])
+      } catch (error) {
+        console.error("Erro:", error)
+      } finally {
+        setLoading(false)
       }
-
-      setProducts(data || [])
-    } catch (error) {
-      console.error("Erro:", error)
-    } finally {
-      setLoading(false)
     }
-  }
+
+    fetchProducts()
+  }, [searchParams.toString()]) // Depend on the string representation of searchParams
 
   if (loading) {
     return (

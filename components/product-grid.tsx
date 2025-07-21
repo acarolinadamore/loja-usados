@@ -7,12 +7,13 @@ import type { Product } from "@/lib/supabase/types"
 import { useSearchParams } from "next/navigation"
 
 export function ProductGrid() {
+  console.log("ProductGrid component is rendering!") // <-- Este log deve aparecer
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const searchParams = useSearchParams()
 
-  // Use searchParams.toString() as a stable dependency
   useEffect(() => {
+    console.log("ProductGrid useEffect triggered.") // <-- Este log deve aparecer
     const searchTerm = searchParams.get("search")
     const categoryIds =
       searchParams.get("categories")?.split(",").map(Number) || []
@@ -20,7 +21,52 @@ export function ProductGrid() {
     const fetchProducts = async () => {
       setLoading(true)
       try {
-        let query = supabase
+        // 1. Fetch Featured Products
+        let featuredQuery = supabase
+          .from("products")
+          .select(
+            `
+            *,
+            categories (
+              name
+            ),
+            featured_products_order (
+              order_index
+            )
+          `
+          )
+          .eq("status", "Disponível")
+          .eq("is_featured", true) // Ensure only featured products are fetched here
+
+        if (searchTerm) {
+          featuredQuery = featuredQuery.or(
+            `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
+          )
+        }
+        if (categoryIds.length > 0) {
+          featuredQuery = featuredQuery.in("category_id", categoryIds)
+        }
+
+        const { data: featuredData, error: featuredError } = await featuredQuery
+
+        if (featuredError) throw featuredError
+
+        console.log("Featured Data fetched:", featuredData) // Debugging: Check raw featured data
+
+        // Sort featured products by their order_index
+        const sortedFeatured = (featuredData || []).sort((a, b) => {
+          // Ensure featured_products_order is an array and has elements
+          const aIndex =
+            a.featured_products_order?.order_index ?? Number.POSITIVE_INFINITY
+          const bIndex =
+            b.featured_products_order?.order_index ?? Number.POSITIVE_INFINITY
+          return aIndex - bIndex
+        })
+
+        console.log("Sorted Featured Products:", sortedFeatured) // Debugging: Check sorted featured data
+
+        // 2. Fetch Non-Featured Products
+        let nonFeaturedQuery = supabase
           .from("products")
           .select(
             `
@@ -31,36 +77,39 @@ export function ProductGrid() {
           `
           )
           .eq("status", "Disponível")
+          .eq("is_featured", false) // Ensure only non-featured products are fetched here
 
         if (searchTerm) {
-          query = query.or(
+          nonFeaturedQuery = nonFeaturedQuery.or(
             `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
           )
         }
-
         if (categoryIds.length > 0) {
-          query = query.in("category_id", categoryIds)
+          nonFeaturedQuery = nonFeaturedQuery.in("category_id", categoryIds)
         }
 
-        query = query.order("created_at", { ascending: false })
+        nonFeaturedQuery = nonFeaturedQuery.order("created_at", {
+          ascending: false,
+        })
 
-        const { data, error } = await query
+        const { data: nonFeaturedData, error: nonFeaturedError } =
+          await nonFeaturedQuery
 
-        if (error) {
-          console.error("Erro ao buscar produtos:", error)
-          return
-        }
+        if (nonFeaturedError) throw nonFeaturedError
 
-        setProducts(data || [])
+        console.log("Non-Featured Data fetched:", nonFeaturedData) // Debugging: Check non-featured data
+
+        // Combine featured and non-featured products
+        setProducts([...sortedFeatured, ...(nonFeaturedData || [])])
       } catch (error) {
-        console.error("Erro:", error)
+        console.error("Erro ao buscar produtos:", error)
       } finally {
         setLoading(false)
       }
     }
 
     fetchProducts()
-  }, [searchParams.toString()]) // Depend on the string representation of searchParams
+  }, [searchParams.toString()]) // Re-fetch when search params change
 
   if (loading) {
     return (

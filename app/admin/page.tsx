@@ -1,15 +1,12 @@
 import { AddProductForm } from "@/components/add-product-form"
 import { ProductList } from "@/components/product-list"
 import { CategoryManager } from "@/components/category-manager"
+import { FeaturedProductManager } from "@/components/featured-product-manager" // Import new component
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Header } from "@/components/header"
 
 export default async function AdminPage() {
-  // Exemplo de como usar o cliente de servidor se precisar buscar dados aqui
-  // const supabase = createSupabaseServerClient();
-  // const { data: products } = await supabase.from('products').select('*');
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -26,6 +23,8 @@ export default async function AdminPage() {
             <TabsTrigger value="add">Adicionar Produto</TabsTrigger>
             <TabsTrigger value="list">Listar Produtos</TabsTrigger>
             <TabsTrigger value="categories">Gerenciar Categorias</TabsTrigger>
+            <TabsTrigger value="featured">Destaques</TabsTrigger>{" "}
+            {/* New Tab Trigger */}
           </TabsList>
 
           <TabsContent value="add">
@@ -57,6 +56,19 @@ export default async function AdminPage() {
               </CardHeader>
               <CardContent>
                 <CategoryManager />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="featured">
+            {" "}
+            {/* New Tab Content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Gerenciar Destaques</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FeaturedProductManager />
               </CardContent>
             </Card>
           </TabsContent>

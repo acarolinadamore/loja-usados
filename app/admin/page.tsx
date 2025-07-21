@@ -3,13 +3,21 @@ import { ProductList } from "@/components/product-list"
 import { CategoryManager } from "@/components/category-manager"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Header } from "@/components/header"
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  // Exemplo de como usar o cliente de servidor se precisar buscar dados aqui
+  // const supabase = createSupabaseServerClient();
+  // const { data: products } = await supabase.from('products').select('*');
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Administração</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Administração
+          </h1>
           <p className="text-gray-600">Gerencie seus produtos e categorias</p>
         </div>
 

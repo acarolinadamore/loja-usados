@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { supabase, uploadMultipleImages, type Category } from "@/lib/supabase"
+import { supabase, uploadMultipleImages } from "@/lib/supabase/client" // Importa do cliente
+import type { Category } from "@/lib/supabase/types" // Importa o tipo
 import { MultiImageUpload } from "./multi-image-upload"
 
 const conditions = [
@@ -34,8 +35,8 @@ export function AddProductForm() {
     condition: "",
     category_id: "",
     whatsapp: "",
-    location: "", // Campo para localização
-    observation: "", // Adicionado: Campo para observações
+    location: "",
+    observation: "",
   })
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const [coverIndex, setCoverIndex] = useState(0)
@@ -60,7 +61,6 @@ export function AddProductForm() {
     setLoading(true)
 
     try {
-      // 1. Inserir produto primeiro
       const { data, error } = await supabase
         .from("products")
         .insert([
@@ -71,8 +71,8 @@ export function AddProductForm() {
             condition: formData.condition,
             category_id: Number.parseInt(formData.category_id),
             whatsapp: formData.whatsapp,
-            location: formData.location, // Salvar localização
-            observation: formData.observation, // Salvar observação
+            location: formData.location,
+            observation: formData.observation,
             status: "Disponível",
           },
         ])
@@ -87,19 +87,17 @@ export function AddProductForm() {
       const productId = data[0].id
       console.log("Produto criado com ID:", productId)
 
-      // 2. Upload das imagens se houver
       if (selectedImages.length > 0) {
         console.log(`Fazendo upload de ${selectedImages.length} imagens...`)
         const imageUrls = await uploadMultipleImages(selectedImages, productId)
 
         if (imageUrls.length > 0) {
           console.log("Atualizando produto com URLs das imagens:", imageUrls)
-          // Atualizar produto com URLs das imagens
           const { error: updateError } = await supabase
             .from("products")
             .update({
               images: imageUrls,
-              image_url: imageUrls[coverIndex] || imageUrls[0], // Imagem de capa
+              image_url: imageUrls[coverIndex] || imageUrls[0],
               cover_image_index: coverIndex,
             })
             .eq("id", productId)
@@ -112,7 +110,6 @@ export function AddProductForm() {
 
       alert("Produto cadastrado com sucesso!")
 
-      // Limpar formulário
       setFormData({
         name: "",
         description: "",
@@ -120,8 +117,8 @@ export function AddProductForm() {
         condition: "",
         category_id: "",
         whatsapp: "",
-        location: "", // Limpar campo de localização
-        observation: "", // Limpar campo de observação
+        location: "",
+        observation: "",
       })
       setSelectedImages([])
       setCoverIndex(0)
@@ -219,7 +216,6 @@ export function AddProductForm() {
             />
           </div>
 
-          {/* Campo de Localização renomeado */}
           <div>
             <Label htmlFor="location">Buscar no Local</Label>
             <Input
@@ -248,7 +244,6 @@ export function AddProductForm() {
             />
           </div>
 
-          {/* Adicionado: Campo de Observação */}
           <div>
             <Label htmlFor="observation">Observação</Label>
             <Textarea

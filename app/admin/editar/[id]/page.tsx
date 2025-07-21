@@ -1,5 +1,5 @@
 import { EditProductForm } from "@/components/edit-product-form"
-import { supabase } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase/server" // Importa do servidor
 import { notFound } from "next/navigation"
 
 interface EditProductPageProps {
@@ -12,6 +12,7 @@ export default async function EditProductPage({
   params,
 }: EditProductPageProps) {
   const { id } = await params
+  const supabase = createSupabaseServerClient()
 
   const { data: product, error } = await supabase
     .from("products")

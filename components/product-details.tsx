@@ -15,8 +15,8 @@ import {
   X,
   MapPin,
   Info,
-} from "lucide-react" // Adicionado MapPin e Info
-import type { Product } from "@/lib/supabase"
+} from "lucide-react"
+import type { Product } from "@/lib/supabase/types" // Importa o tipo
 
 interface ProductDetailsProps {
   product: Product
@@ -26,7 +26,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
 
-  // Usar array de imagens se existir, senão usar image_url única
   const images =
     product.images && product.images.length > 0
       ? product.images
@@ -76,7 +75,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
-  // Gerar URL do Google Maps Embed
   const googleMapsEmbedUrl = product.location
     ? `https://maps.google.com/maps?q=${encodeURIComponent(
         product.location
@@ -86,7 +84,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Botão Voltar */}
         <div className="mb-6">
           <Link href="/">
             <Button variant="outline" className="mb-4 bg-transparent">
@@ -97,7 +94,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Galeria de Imagens */}
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <Dialog
@@ -113,7 +109,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       className="object-cover transition-transform group-hover:scale-105"
                     />
 
-                    {/* Overlay indicando que é clicável */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 text-white px-3 py-1 rounded text-sm">
                         Clique para ampliar
@@ -145,7 +140,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                           <ChevronRight className="h-4 w-4" />
                         </Button>
 
-                        {/* Contador de imagens */}
                         <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
                           {currentImageIndex + 1} / {images.length}
                         </div>
@@ -160,7 +154,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   </div>
                 </DialogTrigger>
 
-                {/* Modal de imagem ampliada */}
                 <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-black border-none">
                   <div className="relative w-full h-full flex items-center justify-center">
                     <Button
@@ -208,7 +201,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </Dialog>
             </Card>
 
-            {/* Miniaturas */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {images.map((image, index) => (
@@ -227,7 +219,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       fill
                       className="object-cover"
                     />
-                    {/* Indicador de imagem ativa */}
                     {currentImageIndex === index && (
                       <div className="absolute inset-0 bg-blue-500/20"></div>
                     )}
@@ -237,7 +228,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             )}
           </div>
 
-          {/* Detalhes do Produto */}
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -304,7 +294,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               </CardContent>
             </Card>
 
-            {/* Botão de Contato - MOVIDO PARA CIMA DA LOCALIZAÇÃO */}
             {product.status === "Disponível" && (
               <Button
                 onClick={handleWhatsApp}
@@ -317,11 +306,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
         </div>
 
-        {/* Seção de Localização com Mapa - AGORA EM LARGURA TOTAL ABAIXO DO GRID */}
         {product.location && (
           <Card className="mt-8">
-            {" "}
-            {/* Adicionado mt-8 para espaçamento */}
             <CardContent className="p-6">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-gray-600" />
@@ -342,11 +328,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </Card>
         )}
 
-        {/* Adicionado: Seção de Observação */}
         {product.observation && (
           <Card className="mt-4">
-            {" "}
-            {/* Adicionado mt-4 para espaçamento */}
             <CardContent className="p-6">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                 <Info className="h-5 w-5 text-gray-600" />

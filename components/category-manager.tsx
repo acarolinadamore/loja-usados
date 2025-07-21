@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Edit, Plus, Check, X } from "lucide-react"
-import { supabase, type Category } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client" // Importa do cliente
+import type { Category } from "@/lib/supabase/types" // Importa o tipo
 
 export function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -31,7 +32,9 @@ export function CategoryManager() {
 
     setLoading(true)
     try {
-      const { error } = await supabase.from("categories").insert([{ name: newCategoryName.trim() }])
+      const { error } = await supabase
+        .from("categories")
+        .insert([{ name: newCategoryName.trim() }])
 
       if (error) {
         alert("Erro ao adicionar categoria: " + error.message)
@@ -52,7 +55,10 @@ export function CategoryManager() {
 
     setLoading(true)
     try {
-      const { error } = await supabase.from("categories").update({ name: editingName.trim() }).eq("id", id)
+      const { error } = await supabase
+        .from("categories")
+        .update({ name: editingName.trim() })
+        .eq("id", id)
 
       if (error) {
         alert("Erro ao atualizar categoria: " + error.message)
@@ -70,7 +76,8 @@ export function CategoryManager() {
   }
 
   const deleteCategory = async (id: number, name: string) => {
-    if (!confirm(`Tem certeza que deseja excluir a categoria "${name}"?`)) return
+    if (!confirm(`Tem certeza que deseja excluir a categoria "${name}"?`))
+      return
 
     setLoading(true)
     try {
@@ -127,7 +134,10 @@ export function CategoryManager() {
                 onKeyPress={(e) => e.key === "Enter" && addCategory()}
               />
             </div>
-            <Button onClick={addCategory} disabled={loading || !newCategoryName.trim()}>
+            <Button
+              onClick={addCategory}
+              disabled={loading || !newCategoryName.trim()}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar
             </Button>
@@ -147,10 +157,16 @@ export function CategoryManager() {
                       <Input
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && updateCategory(category.id)}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && updateCategory(category.id)
+                        }
                         className="max-w-xs"
                       />
-                      <Button size="sm" onClick={() => updateCategory(category.id)} disabled={loading}>
+                      <Button
+                        size="sm"
+                        onClick={() => updateCategory(category.id)}
+                        disabled={loading}
+                      >
                         <Check className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={cancelEdit}>
@@ -167,7 +183,11 @@ export function CategoryManager() {
 
                 {editingId !== category.id && (
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => startEdit(category)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => startEdit(category)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button

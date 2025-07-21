@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 
 interface CategoryWithCount {
   id: number
@@ -46,7 +46,12 @@ export function CategoryFilter() {
         })
       )
 
-      setCategories(categoriesWithCount)
+      // Filter out categories with 0 products
+      const filteredCategories = categoriesWithCount.filter(
+        (category) => category.count > 0
+      )
+
+      setCategories(filteredCategories)
     } catch (error) {
       console.error("Erro ao buscar categorias:", error)
     }

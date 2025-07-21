@@ -3,19 +3,20 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation" // Certifique-se de que useRouter está importado daqui
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { supabase } from "@/lib/supabase" // Importa o cliente Supabase existente
+import { supabase } from "@/lib/supabase/client" // Importa do cliente
 
 export function AuthForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
-  const [isLogin, setIsLogin] = useState(true) // Para alternar entre Login e Cadastro
+  const [isLogin, setIsLogin] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,13 +42,13 @@ export function AuthForm() {
       } else if (data.user) {
         if (isLogin) {
           setMessage("Login bem-sucedido! Redirecionando...")
-          // Em vez de router.push, use router.refresh() para forçar o middleware a reavaliar
           router.refresh()
+          const redirectTo = searchParams.get("redirectedFrom") || "/admin"
+          router.push(redirectTo)
         } else {
           setMessage(
             "Cadastro realizado! Verifique seu email para confirmar a conta."
           )
-          // Opcional: Redirecionar para login ou para uma página de sucesso
         }
       }
     } catch (err: any) {

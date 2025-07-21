@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Edit, Trash2, Eye } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client" // Importa do cliente
+import type { Product } from "@/lib/supabase/types" // Importa o tipo
 
 export function ProductList() {
   const [products, setProducts] = useState<Product[]>([])
@@ -21,12 +22,14 @@ export function ProductList() {
     try {
       const { data, error } = await supabase
         .from("products")
-        .select(`
+        .select(
+          `
           *,
           categories (
             name
           )
-        `)
+        `
+        )
         .order("created_at", { ascending: false })
 
       if (error) {
@@ -77,7 +80,11 @@ export function ProductList() {
   }
 
   if (products.length === 0) {
-    return <div className="text-center py-8 text-gray-500">Nenhum produto cadastrado ainda.</div>
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Nenhum produto cadastrado ainda.
+      </div>
+    )
   }
 
   return (
@@ -88,7 +95,9 @@ export function ProductList() {
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 relative flex-shrink-0">
                 <Image
-                  src={product.image_url || "/placeholder.svg?height=80&width=80"}
+                  src={
+                    product.image_url || "/placeholder.svg?height=80&width=80"
+                  }
                   alt={product.name}
                   fill
                   className="object-cover rounded-lg"
@@ -96,17 +105,27 @@ export function ProductList() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">{product.name}</h3>
-                <p className="text-gray-600 text-sm line-clamp-2 mb-2">{product.description}</p>
+                <h3 className="font-semibold text-lg truncate">
+                  {product.name}
+                </h3>
+                <p className="text-gray-600 text-sm line-clamp-2 mb-2">
+                  {product.description}
+                </p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline">{product.categories?.name || "Sem categoria"}</Badge>
+                  <Badge variant="outline">
+                    {product.categories?.name || "Sem categoria"}
+                  </Badge>
                   <Badge variant="outline">{product.condition}</Badge>
-                  <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
+                  <Badge className={getStatusColor(product.status)}>
+                    {product.status}
+                  </Badge>
                 </div>
               </div>
 
               <div className="text-right flex-shrink-0">
-                <div className="text-xl font-bold text-green-600 mb-2">R$ {product.price.toFixed(2)}</div>
+                <div className="text-xl font-bold text-green-600 mb-2">
+                  R$ {product.price.toFixed(2)}
+                </div>
                 <div className="flex gap-2">
                   <Link href={`/produto/${product.id}`}>
                     <Button variant="outline" size="sm">
@@ -118,7 +137,11 @@ export function ProductList() {
                       <Edit className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm" onClick={() => deleteProduct(product.id, product.name)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => deleteProduct(product.id, product.name)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

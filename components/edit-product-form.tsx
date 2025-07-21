@@ -16,12 +16,8 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
-import {
-  supabase,
-  uploadMultipleImages,
-  type Category,
-  type Product,
-} from "@/lib/supabase"
+import { supabase, uploadMultipleImages } from "@/lib/supabase/client" // Importa do cliente
+import type { Category, Product } from "@/lib/supabase/types" // Importa os tipos
 import { MultiImageUpload } from "./multi-image-upload"
 import Link from "next/link"
 
@@ -48,14 +44,13 @@ export function EditProductForm({ product }: EditProductFormProps) {
     category_id: product.category_id.toString(),
     whatsapp: product.whatsapp || "",
     status: product.status,
-    location: product.location || "", // Campo para localização
-    observation: product.observation || "", // Adicionado: Campo para observações
+    location: product.location || "",
+    observation: product.observation || "",
   })
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const [coverIndex, setCoverIndex] = useState(product.cover_image_index || 0)
   const [loading, setLoading] = useState(false)
 
-  // Imagens existentes do produto
   const existingImages =
     product.images && product.images.length > 0
       ? product.images
@@ -85,7 +80,6 @@ export function EditProductForm({ product }: EditProductFormProps) {
       let finalImages = existingImages
       const finalCoverIndex = coverIndex
 
-      // Upload novas imagens se houver
       if (selectedImages.length > 0) {
         console.log(
           `Fazendo upload de ${selectedImages.length} novas imagens...`
@@ -96,13 +90,11 @@ export function EditProductForm({ product }: EditProductFormProps) {
         )
 
         if (newImageUrls.length > 0) {
-          // Combinar imagens existentes com novas
           finalImages = [...existingImages, ...newImageUrls]
           console.log("Imagens finais:", finalImages)
         }
       }
 
-      // Atualizar produto
       const { error } = await supabase
         .from("products")
         .update({
@@ -113,10 +105,10 @@ export function EditProductForm({ product }: EditProductFormProps) {
           category_id: Number.parseInt(formData.category_id),
           whatsapp: formData.whatsapp,
           status: formData.status,
-          location: formData.location, // Salvar localização
-          observation: formData.observation, // Salvar observação
+          location: formData.location,
+          observation: formData.observation,
           images: finalImages,
-          image_url: finalImages[finalCoverIndex] || finalImages[0], // Imagem de capa
+          image_url: finalImages[finalCoverIndex] || finalImages[0],
           cover_image_index: finalCoverIndex,
           updated_at: new Date().toISOString(),
         })
@@ -258,7 +250,6 @@ export function EditProductForm({ product }: EditProductFormProps) {
                   />
                 </div>
 
-                {/* Campo de Localização renomeado */}
                 <div>
                   <Label htmlFor="location">Buscar no Local</Label>
                   <Input
@@ -287,7 +278,6 @@ export function EditProductForm({ product }: EditProductFormProps) {
                   />
                 </div>
 
-                {/* Adicionado: Campo de Observação */}
                 <div>
                   <Label htmlFor="observation">Observação</Label>
                   <Textarea
@@ -317,7 +307,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
                   </div>
                   <MultiImageUpload
                     onImagesChange={handleImagesChange}
-                    maxImages={8 - existingImages.length} // Limitar baseado nas existentes
+                    maxImages={8 - existingImages.length}
                     existingImages={existingImages}
                     existingCoverIndex={product.cover_image_index || 0}
                   />

@@ -1,37 +1,13 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Tipos para TypeScript
-export interface Product {
-  id: number
-  name: string
-  description: string
-  price: number
-  condition: string
-  category_id: number
-  image_url?: string
-  images?: string[]
-  cover_image_index?: number
-  whatsapp?: string
-  status: string
-  created_at: string
-  updated_at: string
-  categories?: {
-    name: string
-  }
-  location?: string // Campo para localização/endereço
-  observation?: string // Adicionado: Campo para observações
-}
-
-export interface Category {
-  id: number
-  name: string
-  created_at: string
-}
+// Cliente Supabase para uso em Client Components (no navegador)
+// Este cliente gerencia automaticamente os cookies do navegador.
+// Garante que as variáveis de ambiente são lidas corretamente.
+export const supabase: SupabaseClient = createClientComponentClient({
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+})
 
 // Função para upload de múltiplas imagens
 export const uploadMultipleImages = async (
@@ -43,15 +19,14 @@ export const uploadMultipleImages = async (
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
     const fileExt = file.name.split(".").pop()
-    const fileName = `${productId}_${Date.now()}_${i}.${fileExt}`
-    const filePath = `products/${fileName}`
+    const fileName = `products/${productId}_${Date.now()}_${i}.${fileExt}` // Caminho completo no bucket
 
     try {
-      console.log(`Fazendo upload ${i + 1}/${files.length}:`, filePath)
+      console.log(`Fazendo upload ${i + 1}/${files.length}:`, fileName)
 
       const { data, error } = await supabase.storage
         .from("product-images")
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: "3600",
           upsert: false,
         })
@@ -63,7 +38,7 @@ export const uploadMultipleImages = async (
 
       const { data: urlData } = supabase.storage
         .from("product-images")
-        .getPublicUrl(filePath)
+        .getPublicUrl(fileName)
       uploadedUrls.push(urlData.publicUrl)
 
       console.log(`Upload ${i + 1} concluído:`, urlData.publicUrl)

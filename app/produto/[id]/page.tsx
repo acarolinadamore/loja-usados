@@ -1,5 +1,5 @@
 import { ProductDetails } from "@/components/product-details"
-import { supabase } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase/server" // Importa do servidor
 import { notFound } from "next/navigation"
 
 interface ProductPageProps {
@@ -10,6 +10,7 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params
+  const supabase = createSupabaseServerClient()
 
   const { data: product, error } = await supabase
     .from("products")

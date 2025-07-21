@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MessageCircle } from "lucide-react"
-import type { Product } from "@/lib/supabase"
+import type { Product } from "@/lib/supabase/types"
 import Link from "next/link"
 
 interface ProductCardProps {
@@ -14,9 +14,13 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const handleWhatsApp = () => {
-    const message = `Olá! Tenho interesse no produto: ${product.name} - R$ ${product.price.toFixed(2)}`
+    const message = `Olá! Tenho interesse no produto: ${
+      product.name
+    } - R$ ${product.price.toFixed(2)}`
     const whatsapp = product.whatsapp || "11999999999"
-    const url = `https://wa.me/55${whatsapp}?text=${encodeURIComponent(message)}`
+    const url = `https://wa.me/55${whatsapp}?text=${encodeURIComponent(
+      message
+    )}`
     window.open(url, "_blank")
   }
 
@@ -53,12 +57,20 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-2 line-clamp-1">{product.name}</h3>
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+          <h3 className="font-semibold text-lg mb-2 line-clamp-1">
+            {product.name}
+          </h3>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {product.description}
+          </p>
 
           <div className="flex items-center justify-between mb-3">
-            <span className="text-2xl font-bold text-green-600">R$ {product.price.toFixed(2)}</span>
-            <Badge className={getConditionColor(product.condition)}>{product.condition}</Badge>
+            <span className="text-2xl font-bold text-green-600">
+              R$ {product.price.toFixed(2)}
+            </span>
+            <Badge className={getConditionColor(product.condition)}>
+              {product.condition}
+            </Badge>
           </div>
         </CardContent>
 
